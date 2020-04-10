@@ -14,16 +14,27 @@ object BenchmarksHarness extends App {
   def runBenchmarks(dirname: String,
                     filenameToGoldStandard: String => String,
                     resultPrinter: (List[RankedProgram], List[ASTNode], Long) => String
-                   ): List[String] = for (file <- new java.io.File(dirname).listFiles().toList) yield {
-    val t0 = System.currentTimeMillis()
-    val programs = Main.synthesize(file.getAbsolutePath)
-    val t1 = System.currentTimeMillis()
-    val origFilename = filenameToGoldStandard(file.getName)
-    val task = new SygusFileTask(scala.io.Source.fromFile(file).mkString)
-    val goldStandard = Solutions.solutions.withDefaultValue(Nil)(origFilename).map{ solution =>
-      Main.interpret(task,solution)
+                   ): List[String] = {
+    val dirFiles = new java.io.File(dirname).listFiles().toList
+    val numFiles = dirFiles.length
+    println(s"Testing $dirname")
+    var nextTick = 5
+    for ((file,idx) <- dirFiles.zipWithIndex) yield {
+      val t0 = System.currentTimeMillis()
+      val programs = Main.synthesize(file.getAbsolutePath)
+      val t1 = System.currentTimeMillis()
+      val origFilename = filenameToGoldStandard(file.getName)
+      val task = new SygusFileTask(scala.io.Source.fromFile(file).mkString)
+      val goldStandard = Solutions.solutions.withDefaultValue(Nil)(origFilename).map{ solution =>
+        Main.interpret(task,solution)
+      }
+      val percentageDone = (idx * 100)/numFiles
+      if (percentageDone > nextTick) {
+        println(s"$percentageDone%")
+        nextTick = Math.ceil(percentageDone / 5.0).toInt * 5
+      }
+      file.getName + resultPrinter(programs.toList,goldStandard,t1 - t0)
     }
-    file.getName + resultPrinter(programs.toList,goldStandard,t1 - t0)
   }
 
   val regularBenchmarkPrinter: (List[RankedProgram], List[ASTNode], Long) => String = { (programs,goldStandard, msec) =>
