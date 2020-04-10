@@ -2,6 +2,7 @@ import sygus.Main.RankedProgram
 import sygus.Main
 import ast.ASTNode
 import sygus.SygusFileTask
+import org.apache.commons.cli.{Options,DefaultParser,CommandLineParser}
 
 object Solutions {
 
@@ -37,6 +38,21 @@ object BenchmarksHarness extends App {
     }
   }
 
+  val options = new Options()
+  options.addOption("e","easy",false,"Run the 'easy' benchmark set")
+  options.addOption("h","hard", false, "Run the 'hard' benchmark set")
+  options.addOption("n","nosolution",false,"Run the 'no solution' benchmark set")
+  options.addOption("o","overfitted",false,"run the 'overfitted' benchmark set")
+
+  val parser = new DefaultParser
+  val cmd = parser.parse(options, args)
+
+  val all = cmd.getOptions.isEmpty //if no option provided, run all
+  val orig = all || cmd.hasOption('e')
+  val contradiction = all || cmd.hasOption('n')
+  val garbage = all || cmd.hasOption('o')
+  val toohard = all || cmd.hasOption('h')
+
   val regularBenchmarkPrinter: (List[RankedProgram], List[ASTNode], Long) => String = { (programs,goldStandard, msec) =>
 //    if (programs.isEmpty) Console.RED + " NO RESULTS" + Console.RESET else if (goldStandard.exists(gold => gold.code == programs.head.program.code))
 //      " PASSED"
@@ -45,13 +61,13 @@ object BenchmarksHarness extends App {
     val idx = programs.zipWithIndex.filter{case (program,idx) => goldStandard.exists(gold => gold.code == program.program.code)}.headOption.map(_._2.toString).getOrElse("")
     "," + idx + "," + msec
   }
-  val origBenchmarks: List[String] = Nil//runBenchmarks("src/test/benchmarks/syguscomp",identity,regularBenchmarkPrinter)
+  val origBenchmarks: List[String] = if (orig) runBenchmarks("src/test/benchmarks/syguscomp",identity,regularBenchmarkPrinter) else Nil
 
-  val contradictionBenchmarks = Nil//runBenchmarks("src/test/benchmarks/modified_benchmarks/contradiction", filename => filename.dropRight(5) + ".sl",regularBenchmarkPrinter)
+  val contradictionBenchmarks = if (contradiction) runBenchmarks("src/test/benchmarks/modified_benchmarks/contradiction", filename => filename.dropRight(5) + ".sl",regularBenchmarkPrinter) else Nil
 
-  val garbageBenchmarks = Nil//runBenchmarks("src/test/benchmarks/modified_benchmarks/returns_garbage", filename => filename.dropRight(5) + ".sl",regularBenchmarkPrinter)
+  val garbageBenchmarks = if (garbage)  runBenchmarks("src/test/benchmarks/modified_benchmarks/returns_garbage", filename => filename.dropRight(5) + ".sl",regularBenchmarkPrinter) else Nil
 
-  val tooHardBenchmarks = runBenchmarks("src/test/benchmarks/too-hard",identity, { (_origPrograms,goldStandard, msec) =>
+  val tooHardBenchmarks = if (toohard) runBenchmarks("src/test/benchmarks/too-hard",identity, { (_origPrograms,goldStandard, msec) =>
     val programs = _origPrograms.take(5)
 
     def goldSimSorter (gold1: (ASTNode,Int),gold2: (ASTNode,Int)): Boolean = (gold1,gold2) match {
@@ -89,18 +105,30 @@ object BenchmarksHarness extends App {
       ,if (programs.isEmpty) 0 else (progsWithClosest.map{case (gold,sim) => sim.toDouble / gold.terms}.sum / programs.length)// % of closest
 
     ).mkString(",",",","")
-  })
+  }) else Nil
 
-  println("Original benchmarks:")
-  origBenchmarks.foreach(println)
-  println
-  println("Modified benchmarks:")
-  contradictionBenchmarks.foreach(println)
-  println
-  println("Modified benchmarks (returns garbage):")
-  garbageBenchmarks.foreach(println)
-  println
-  println("Too hard benchmarks:")
-  tooHardBenchmarks.foreach(println)
-  println
+  if (orig) {
+    println("Easy benchmarks:")
+    println("name,index of solution,time(msec)")
+    origBenchmarks.foreach(println)
+    println
+  }
+  if (contradiction) {
+    println("Modified benchmarks - no solution:")
+    println("name,index of solution,time(msec)")
+    contradictionBenchmarks.foreach(println)
+    println
+  }
+  if (garbage) {
+    println("Modified benchmarks - overfitted:")
+    println("name,index of solution,time(msec)")
+    garbageBenchmarks.foreach(println)
+    println
+  }
+  if (toohard) {
+    println("Hard benchmarks:")
+    println("# solutions, gold standard average height, gold standard average terms, rank 1 height, rank 1 terms, rank 1 distance to GS (terms), rank 1 % of closest solution, best rank, best height, best terms, best distance to GS (terms),% of closest solution,avg distance, avg % of closest")
+    tooHardBenchmarks.foreach(println)
+    println
+  }
 }
