@@ -14,16 +14,16 @@ import util.control.Breaks._
 import scala.concurrent.duration._
 import trace.DebugPrints.{dprintln,iprintln}
 import pcShell.ConsolePrints._
-
+import org.apache.commons.cli.{Options,DefaultParser,CommandLineParser}
 
 object Main extends App {
-  val filename = //"C:\\utils\\sygus-solvers\\SyGuS-Comp17\\PBE_Strings_Track\\univ_3_short.sl"
-  //"src/test/benchmarks/too-hard/split-numbers-from-units-of-measure_2.sl"
-  //"src/test/benchmarks/modified_benchmarks/returns_garbage/compare-two-strings_1.sl"
-   "src/test/benchmarks/syguscomp/change-negative-numbers-to-positive.sl"
-  //"C:\\utils\\sygus-solvers\\SyGuS-Comp17\\PBE_Strings_Track\\univ_2_short.sl"
-   //"C:\\utils\\sygus-solvers\\PBE_SLIA_Track\\euphony\\stackoverflow4.sl"//args(0)
-  //"C:\\Users\\hila\\prime\\papers\\postdoc_papers\\partial_correctness\\figures\\count-line-breaks-in-cell.sl"
+  val options = new Options()
+  options.addRequiredOption("f","file",true,"Synthesis task file in SyGuS format")
+  options.addOption("t","timeout",true,"Synthesis timeout (seconds)")
+  val parser = new DefaultParser
+  val cmd = parser.parse(options, args)
+
+  val filename = cmd.getOptionValue('f')
 
   case class RankedProgram(program:ASTNode, rank:Double) extends Ordered[RankedProgram] {
     override def compare(that: RankedProgram): Int = this.rank.compare(that.rank)
@@ -32,7 +32,7 @@ object Main extends App {
   def synthesize(filename: String) = {
      val task = new SygusFileTask(scala.io.Source.fromFile(filename).mkString)
      assert(task.isPBE)
-    synthesizeFromTask(task)
+     synthesizeFromTask(task,if (cmd.hasOption('t')) cmd.getOptionValue('t').toInt else 40)
    }
 
   def synthesizeFromTask(task: SygusFileTask, timeout: Int = 40) = {
@@ -113,7 +113,7 @@ object Main extends App {
     }
   }
 
-  trace.DebugPrints.setDebug()
+  trace.DebugPrints.setNone()
 //  val (prog, _) = interpret(filename, "(str.++ firstname lastname)").get
 //  println(prog.code)
 //  println(prog.values)
