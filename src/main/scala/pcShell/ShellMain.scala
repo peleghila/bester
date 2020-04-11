@@ -10,13 +10,21 @@ import sygus._
 import scala.util.control.Exception.allCatch
 import ConsolePrints._
 import jline.console.completer.{Completer, StringsCompleter}
+import org.apache.commons.cli.{DefaultParser, Options}
 import sygus.Main.RankedProgram
 
 
 
 object ShellMain extends App {
-  val taskFilename = args(0)
-  if (args.length > 1 && args(1) == "--out")
+  val options = new Options()
+  options.addRequiredOption("f","file",true,"Synthesis task file in SyGuS format")
+  options.addOption("t","timeout",true,"Synthesis timeout (seconds)")
+  options.addOption("o","out",false,"Output session to file")
+  val parser = new DefaultParser
+  val cmd = parser.parse(options, args)
+
+  val taskFilename = cmd.getOptionValue("file")
+  if (cmd.hasOption("out"))
     outFile = Some(File.createTempFile("bester_", ".log",new java.io.File(".")))
   val task = new SygusFileTask(scala.io.Source.fromFile(taskFilename).mkString)
   var currentResults: scala.collection.immutable.List[String] = Nil
@@ -119,7 +127,7 @@ object ShellMain extends App {
     "  :synt (:s)    -- to synthesize a program\n" +
     "  :quit (:q)    -- to quit\n" +
     "  :1, :2, ...   -- for most recent synthesis results"
-  cprintln(s"Welcome to Besto! $hint", infoColor)
+  cprintln(s"Welcome to Bester! $hint", infoColor)
 
   var line: String = null
   while ((line = reader.readLine()) != null) {
@@ -129,7 +137,7 @@ object ShellMain extends App {
         case "quit" | "q" => sys.exit(0)
         case "synt" | "s" => {
           cprintln("Synthesizing... (Press any key to interrupt)", infoColor)
-          val results = Main.synthesizeFromTask(task, 40).take(5)
+          val results = Main.synthesizeFromTask(task, cmd.getOptionValue('t',"40").toInt).take(5)
           if (results.isEmpty) {
             cprintln("No results, try waiting a bit longer", infoColor)
           } else {

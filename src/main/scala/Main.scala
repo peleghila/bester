@@ -32,7 +32,7 @@ object Main extends App {
   def synthesize(filename: String) = {
      val task = new SygusFileTask(scala.io.Source.fromFile(filename).mkString)
      assert(task.isPBE)
-     synthesizeFromTask(task,if (cmd.hasOption('t')) cmd.getOptionValue('t').toInt else 40)
+     synthesizeFromTask(task,cmd.getOptionValue('t',"40").toInt)
    }
 
   def synthesizeFromTask(task: SygusFileTask, timeout: Int = 40) = {
