@@ -95,7 +95,7 @@ class InterpreterTests extends JUnitSuite {
           failed = true
         }
         case Some((p, outputs)) =>
-          println(s"\nParsed: ${p.code}")
+          //println(s"\nParsed: ${p.code}")
           if (checkOutput && p.values != outputs) {
             println(Console.RED + s"Output: ${p.values.mkString(", ")}")
             println(s"Expect: ${outputs.mkString(", ")}" + Console.RESET)
