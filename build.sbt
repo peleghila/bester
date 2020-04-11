@@ -1,4 +1,4 @@
-name := "partialcorrectness_sem"
+name := "bester_synthesizer"
 
 version := "0.1"
 
@@ -29,6 +29,9 @@ libraryDependencies += "org.scalatestplus" %% "scalatestplus-junit" % "1.0.0-SNA
 
 // https://mvnrepository.com/artifact/commons-cli/commons-cli
 libraryDependencies += "commons-cli" % "commons-cli" % "1.4"
+
+mainClass in (assembly) := Some("pcShell.ShellMain")
+
 
 
 //Anlr command line:
