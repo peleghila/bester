@@ -30,8 +30,9 @@ libraryDependencies += "org.scalatestplus" %% "scalatestplus-junit" % "1.0.0-SNA
 // https://mvnrepository.com/artifact/commons-cli/commons-cli
 libraryDependencies += "commons-cli" % "commons-cli" % "1.4"
 
-mainClass in (assembly) := Some("pcShell.ShellMain")
-
+//mainClass in (assembly) := Some("pcShell.ShellMain")
+Project.inConfig(Test)(baseAssemblySettings)
+assemblyJarName in (Test, assembly) := s"${name.value}-full.jar"
 
 
 //Anlr command line:
