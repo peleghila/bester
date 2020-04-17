@@ -5,8 +5,8 @@ import sygus.SygusFileTask
 import org.apache.commons.cli.{Options,DefaultParser,CommandLineParser}
 
 object Solutions {
-
-  lazy val solutions = scala.io.Source.fromFile("src/test/benchmarks/solutions.txt").getLines().map(line =>
+  var file = "src/test/benchmarks/solutions.txt"
+  lazy val solutions = scala.io.Source.fromFile(file).getLines().map(line =>
     (line.substring(0,line.indexOf(' ')),line.substring(line.indexOf(' ') + 1))).toList.groupBy(_._1).toList.map(pair => (pair._1,pair._2.map(le => le._2))).toMap
 
 }
