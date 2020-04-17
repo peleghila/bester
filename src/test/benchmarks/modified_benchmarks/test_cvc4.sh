@@ -1,20 +1,23 @@
 #!/bin/bash
+CVC4_BIN=/mnt/c/utils/cvc4/cvc4-1.7-win64-opt.exe
+#for_cvc4=./for_cvc4
+
 
 test_file () {
 	filename=`echo $1 | cut -d'/' -f 2`
 	echo "$filename"
 	base_filename="${filename%.*}"
 	STARTTIME=$(date +%s)
-	out=`timeout 20 /c/utils/sygus-solvers/cvc4/cvc4-1.7-win64-opt.exe $1`
+	out=`timeout 20 $CVC4_BIN $1`
 	retval=$?
 	if [ $retval = 0 ]; then
-		echo $out | tr '\r' '\n' | awk 'END{print}'
+		echo $out
 	fi
-	for cvc4_file in for_cvc4/$base_filename*.sl; do
-		out=`timeout 20 /c/utils/sygus-solvers/cvc4/cvc4-1.7-win64-opt.exe $cvc4_file`
+	for cvc4_file in $for_cvc4/$base_filename*.sl; do
+		out=`timeout 20 $CVC4_BIN $cvc4_file`
 		retval=$?
 		if [ $retval = 0 ]; then
-			echo $out | tr '\r' '\n' | awk 'END{print}'
+			echo $out
 		fi
 	done
 	ENDTIME=$(date +%s)

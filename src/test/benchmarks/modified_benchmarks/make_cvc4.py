@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 
 def do_file(indir,outdir,filename):
     infile = os.path.join(indir,filename)
@@ -21,9 +22,12 @@ def do_indir(indir):
         do_file(indir,outdir,filename)
 
 
-indir1 = 'C:\\Users\\hila\\IdeaProjects\\partialCorrectness\\src\\test\\benchmarks\\modified_benchmarks\\contradiction'
-indir2 = 'C:\\Users\\hila\\IdeaProjects\\partialCorrectness\\src\\test\\benchmarks\\modified_benchmarks\\returns_garbage'
-outdir = 'C:\\Users\\hila\\IdeaProjects\\partialCorrectness\\src\\test\\benchmarks\\modified_benchmarks\\for_cvc4'
+indir1 = './contradiction'
+indir2 = './returns_garbage'
+if len(sys.argv) > 1:
+    outdir = sys.argv[1]
+else: 
+    outdir = './for_cvc4'
 
 do_indir(indir1)
 do_indir(indir2)
