@@ -1,5 +1,5 @@
 #!/bin/bash
-CVC4_BIN=/mnt/c/utils/cvc4/cvc4-1.7-win64-opt.exe
+CVC4_BIN=~/cvc4-1.7-x86_64-linux-opt
 #for_cvc4=./for_cvc4
 
 
