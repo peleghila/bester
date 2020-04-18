@@ -29,13 +29,13 @@ object Main extends App {
     override def compare(that: RankedProgram): Int = this.rank.compare(that.rank)
   }
 
-  def synthesize(filename: String) = {
+  def synthesize(filename: String, timeout: Int = 40) = {
      val task = new SygusFileTask(scala.io.Source.fromFile(filename).mkString)
      assert(task.isPBE)
-     synthesizeFromTask(task,cmd.getOptionValue('t',"40").toInt)
+     synthesizeFromTask(task,timeout)
    }
 
-  def synthesizeFromTask(task: SygusFileTask, timeout: Int = 40) = {
+  def synthesizeFromTask(task: SygusFileTask, timeout: Int) = {
     val oeManager = new InputsValuesManager()
     val enumerator = new enumeration.Enumerator(task.vocab, oeManager, task.examples.map(_.input))
     //val foundPrograms: mutable.Map[List[Boolean], mutable.ListBuffer[ASTNode]] = mutable.HashMap()
@@ -117,5 +117,5 @@ object Main extends App {
 //  val (prog, _) = interpret(filename, "(str.++ firstname lastname)").get
 //  println(prog.code)
 //  println(prog.values)
-  synthesize(filename).foreach(pr => println((pr.program.code,pr.rank)))
+  synthesize(filename,cmd.getOptionValue('t',"40").toInt).foreach(pr => println((pr.program.code,pr.rank)))
 }
