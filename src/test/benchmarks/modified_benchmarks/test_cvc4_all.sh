@@ -1,7 +1,7 @@
 #!/bin/bash
 
-BESTER_JAR=/mnt/c/Users/peleg/code/partialcorrectness/target/scala-2.13/bester_synthesizer-full.jar
-SOLUTIONS=/mnt/c/Users/peleg/code/partialcorrectness/src/test/benchmarks/solutions.txt
+BESTER_JAR=~/bester/target/scala-2.13/bester_synthesizer-full.jar
+SOLUTIONS=~/bester/src/test/benchmarks/solutions.txt
 
 echo 'Generating CVC4 dropped example files'
 filesdir=`mktemp -d -p .`
